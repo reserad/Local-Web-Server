@@ -1,0 +1,43 @@
+﻿@model Local_Web_Server.Models.SpotifyModel
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script>
+    function Skip() {
+        $.ajax({
+            type: "POST",
+            url: "/Test/VoteSkip/",
+            contentType: "application/json",
+            data: {},
+            dataType: "json",
+            success: function () {
+                swal("Success!", "Thank you for your suggestion!", "success");
+            },
+            error: function () { sweetAlert("Error Son", "Something went wrong!", "error"); }
+        });
+    }
+</script>
+<h2>@Model.SongTitle - @Model.SongArtist</h2>
+@{ var str = Convert.ToBase64String(Model.SongAlbumArt); }
+<img src="data:image/png;base64,@str " alt="Red dot">
+
+@{
+    if (!Model.Empty)
+    {
+        <button class="btn btn-info" onclick="Skip()">Vote To Skip <span class="glyphicon glyphicon-thumbs-down"></span></button>
+        List<SelectListItem> sl = new List<SelectListItem>();
+        foreach (var song in Model.Tracks)
+        {
+            SelectListItem selectListItem = new SelectListItem()
+            {
+                Text = song.title + " - " + song.artist,
+                Value = song.title,
+                Selected = false
+            };
+            sl.Add(selectListItem);
+        }
+        @Html.DropDownListFor(m => m.ChosenSong, sl, new { @class = "form-control" })
+    }
+}

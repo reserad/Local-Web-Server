@@ -89,17 +89,17 @@
                     @{
                         if (User.Identity.IsAuthenticated)
                         {
-                            WeatherModel info = new WeatherModel();
+                            var info = new WeatherModel();
                             try
                             {
                                 info.current_observation = info.GetLatestWeather();
-                                TimeSpan ts = System.DateTime.Now - info.current_observation.LastRefresh;
+                                var ts = System.DateTime.Now - info.current_observation.LastRefresh;
                                 if (ts.Days > 1 || ts.Minutes > 30 || ts.Hours > 1)
                                 {
                                     info.Truncate();
                                     User userModel = new User();
                                     userModel.UpdateActivityTime(User.Identity.Name);
-                                    WebClient client = new WebClient();
+                                    var client = new WebClient();
                                     client.Proxy = null;
                                     var str = client.DownloadString("http://api.wunderground.com/api/285164b0af259d47/conditions/q/OH/Cincinnati.json");
 
