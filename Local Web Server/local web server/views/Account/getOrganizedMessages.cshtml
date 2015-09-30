@@ -1,0 +1,70 @@
+﻿@using Local_Web_Server.Models;
+@model Local_Web_Server.Models.MessagePageModel
+
+@if(Model.organizedMessages != null){
+    foreach (var group in Model.organizedMessages)
+    {
+        string SendingToWhom = "";
+        if (group[0].From != User.Identity.Name)
+        {
+            SendingToWhom = group[0].From;
+        }
+        else
+        {
+            SendingToWhom = group[0].To;
+        }
+        List<User> users = new List<User>();
+        User user = new User();
+        users = user.AllUsers();
+        string status = "";
+            if (users.Count > 0)
+            {
+                foreach (var item in users)
+                {
+                    if (item.UserName == SendingToWhom)
+                    {
+
+                        if ((System.DateTime.Now - item.LastActivity).Minutes <= 2)
+                        {
+                            status = "Online";
+                        }
+                        else
+                        {
+                            status = item.LastActivity.ToString();
+                        }
+
+                    }
+                }
+                <table style="width:90%; table-layout: fixed;" align="center" class="tableData" data-name="@SendingToWhom">
+                    <tr class="innerClass">
+                        <td>
+                            <h4 style="background-color:#35484C; width:100%; color:white; vertical-align:middle; margin:0px; border-radius:10px 10px 0px 0px; padding:10px;">@SendingToWhom (@status)</h4>
+                            <div class="table-wrapper">
+                                <div class="table-scroll" style="background-color: lightgray;">
+                                    <table class="child-table" style="width:100%; table-layout: fixed;" cellpadding="10">
+                                        <thead><tr><th style="visibility:hidden;"></th><th style="visibility:hidden;"></th><th style="visibility:hidden;"></th></tr></thead>
+                                        <tbody style="word-wrap: break-word">
+                                            @foreach (var _message in group)
+                                            {
+                                                if (_message.From == User.Identity.Name)
+                                                {
+                                                    <tr class="thread-item"><td style="width:30%"><div style="font-size:smaller; color:darkgray;">@_message.TimeStamp.ToString("MM/dd/yy h:mm:ss tt")</div>You: </td><td colspan="2" style="width:70%; background: linear-gradient(#C9E9FF, #B2E0FF); border-radius:8px;">@_message.Message</td></tr>
+                                                }
+                                                else
+                                                {
+                                                    <tr class="thread-item"><td style="width:30%"><div style="font-size:smaller; color:darkgray;">@_message.TimeStamp.ToString("MM/dd/yy h:mm:ss tt")</div>@_message.From: </td><td colspan="2" style="width:70%; background:linear-gradient(#DAFFCD, #C2FFAD); border-radius:8px;">@_message.Message</td></tr>
+                                                }
+                                                <tr><td>&nbsp;</td></tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            }
+        MessagesModel messageModel = new MessagesModel();
+        messageModel.MarkAsRead(User.Identity.Name);
+    }
+}

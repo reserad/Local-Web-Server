@@ -1,0 +1,121 @@
+﻿@using Microsoft.Ajax.Utilities
+@using Local_Web_Server.Models
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Web Server</title>
+
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+
+    <style>
+        body {
+            background-color: #E9EAED;
+        }
+
+        h1, h2, h3, h4 {
+            color: #404d5b;
+            font-family: sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <table style="width:90%;" align="center" cellpadding="0">
+        <tr>
+            <td>
+                <div class="navbar navbar-default navbar-fixed-top">
+                    <div class="container">
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                            </button>
+                        </div>
+                        <div class="navbar-collapse collapse">
+                            <ul class="nav navbar-nav">
+
+                                @if (User.Identity.IsAuthenticated)
+                                {
+                                    <li class="dropdown">
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Productivity<span class="caret"></span></a>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li>@Html.ActionLink("Calendar", "Index", "CalendarEvents")</li>
+                                            <li class="divider"></li>
+                                            <li>@Html.ActionLink("Surveys", "Index", "SurveyItems")</li>
+                                        </ul>
+                                    </li>
+                                    <li class="dropdown">
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Media<span class="caret"></span></a>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li>@Html.ActionLink("Plex", "Plex", "Media")</li>
+                                            <li class="divider"></li>
+                                            <li>@Html.ActionLink("File Zone", "FileZone", "Media")</li>
+                                        </ul>
+                                    </li>
+                                    <li>@Html.ActionLink("Cameras", "SecurityCam", "Security")</li>
+
+                                    <li>@Html.ActionLink("Who's Home", "WhoIsAtHome", "Info")</li>
+                                    MessagesModel messageModel = new MessagesModel();
+                                    var count = messageModel.NumberUnreadMessages(User.Identity.Name);
+                                    if (count > 0 || Request.Url.AbsoluteUri != "http://localhost:35885/Account/Messages")
+                                    {
+                                        <li><a href="@Url.Action("Messages", "Account")"><span class="badge">@count</span> Messages</a></li>
+                                    }
+                                    else
+                                    {
+                                        <li>@Html.ActionLink("Messages", "Messages", "Account")</li>
+                                    }
+                                    <li>@Html.ActionLink("Settings", "Settings", "Account")</li>
+                                    <li>@Html.ActionLink("Log Out", "Logout", "Account")</li>
+                                }
+                                else
+                                {
+                                    <li>@Html.ActionLink("Login", "Login", "Account")</li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div style="text-align:center; padding-right:15px; background: rgba(130, 207, 100, .2); border-bottom-right-radius: 12px;
+    border-bottom-left-radius: 12px;">
+                    @{
+                        if (User.Identity.IsAuthenticated)
+                        {
+                            WeatherModel info = new WeatherModel();
+                            try
+                            {
+                                info.current_observation = info.GetLatestWeather();
+                                TimeSpan ts = System.DateTime.Now - info.current_observation.LastRefresh;
+                                if (ts.Days > 1 || ts.Minutes > 30 || ts.Hours > 1)
+                                {
+                                    info.Truncate();
+                                    User userModel = new User();
+                                    userModel.UpdateActivityTime(User.Identity.Name);
+                                    WebClient client = new WebClient();
+                                    client.Proxy = null;
+                                    var str = client.DownloadString("http://api.wunderground.com/api/285164b0af259d47/conditions/q/OH/Cincinnati.json");
+
+                                    info = Newtonsoft.Json.JsonConvert.DeserializeObject<WeatherModel>(str);
+                                    info.CreateWeather(info.current_observation);
+                                }
+                            }
+                            catch (Exception e) { }
+                            <table style="width: 100%;"><tr><td align="left" style="width: 40%; padding-left: 10px">Hello <b>@User.Identity.Name</b></td><td style="width: 60%; padding-right: 10px" align="right"><img src="@info.current_observation.icon_url">@info.current_observation.temp_f F at @info.current_observation.wind_mph MPH</td></tr></table>
+                        }
+                    }
+                </div>
+            </td>
+        </tr>
+        <tr><td>@RenderBody()</td></tr>
+    </table>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

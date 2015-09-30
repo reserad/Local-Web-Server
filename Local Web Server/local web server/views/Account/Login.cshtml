@@ -1,0 +1,98 @@
+﻿@model Local_Web_Server.Models.User
+@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    html,body {
+        background-image:url("/Content/trianglify-background.svg");
+        background-repeat:no-repeat;
+        background-size:auto;
+    }
+    .outer {
+        display: table;
+        position: absolute;
+        height: 75%;
+        width: 90%;
+    }
+
+    .middle {
+        display: table-cell;
+        vertical-align: middle;
+    }
+
+    .inner {
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+        $('#frm').keypress(keypressHandler);
+        $(".form-control").keydown(function (e) {
+            if (e.which == 32) {
+                return false;
+            }
+        });
+    });
+    function keypressHandler(e) {
+        
+        if (e.which == 13) {
+            $("frm").submit();
+        }
+    }
+
+
+</script>
+
+    @if (Html.ValidationSummary(true, "") != null)
+    {
+        <table style="width:100%" class="alert alert-danger">
+            <tr>
+                <td style="width:75%; padding-left:10px;"> <h3>Invalid Credentials</h3></td>
+                <td style="width:25%"><img src='~/Content/loginFailed.gif' style="width:64px; height:80px;" /></td>
+            </tr>
+        </table>
+    }
+    
+<center>
+    <div class="outer">
+        <div class="middle">
+            <div class="inner container body-content" style="vertical-align:middle;">
+
+                @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "frm", @class = "form-horizontal", @style = "width:100%; height:100%;" }))
+                {
+                    <table style="width:50%; height:100%">
+                        <tr>
+                            <td colspan="2">
+                                <div class="editor-field">
+                                    @Html.TextBoxFor(u => u.UserName, new { @class = "form-control", @placeholder = "Username", required = "required " })
+                                    @Html.ValidationMessageFor(u => u.UserName)
+                                </div>
+                            </td>
+                        </tr>
+                        <tr><td>&nbsp;</td></tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="editor-field">
+                                    @Html.PasswordFor(u => u.Password, new { @class = "form-control", @placeholder = "Password" })
+                                    @Html.ValidationMessageFor(u => u.Password)
+                                </div>
+                            </td>
+                        </tr>
+                        <tr><td>&nbsp;</td></tr>
+                        <tr>
+                            <td style="width:50%">
+                                <input type="submit" value="Log In" class="SubmitButton btn btn-success" style="width:100%" />
+                            </td>
+                            <td style="width:50%">
+                                @Html.ActionLink(linkText: "Create Account", actionName: "Create", routeValues: null, htmlAttributes: new { @class = "btn btn-primary", @style = "width:100%;" })
+                            </td>
+                        </tr>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</center>

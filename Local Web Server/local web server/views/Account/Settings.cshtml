@@ -1,0 +1,31 @@
+﻿@model Local_Web_Server.Models.SettingsModel
+@{
+    ViewBag.Title = "Settings";
+}
+
+<h2>Settings</h2>
+
+@using (Html.BeginForm())
+{
+<div class="jumbotron" style="width:100%; border-radius:20px; background-color:#F8F8F8;">
+    <div class="container" style="width:100%">
+        @if (Model != null)
+        {
+            if (Model.Service)
+            {
+                <div> @Html.EditorFor(x => x.Service, new { @checked = "checked" }) Get emails reminders for upcomming assignments</div>
+            }
+            else
+            {
+                <div> @Html.EditorFor(x => x.Service) Get emails reminders for upcomming assignments</div>
+            }
+        }
+        else
+        {
+            <div> @Html.EditorFor(x => x.Service) Get emails reminders for upcomming assignments</div>
+        }
+        <br />
+        <input type="submit" value="Save Settings" class="btn btn-lg btn-success" />
+        </div>
+    </div>
+}

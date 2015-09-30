@@ -1,0 +1,149 @@
+﻿@using Local_Web_Server.Models;
+@model Local_Web_Server.Models.MessagePageModel
+@{
+    ViewBag.Title = "Messages";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+    .table-wrapper {
+        position: relative;
+    }
+
+    .table-scroll {
+        height: 300px;
+        overflow: auto;
+    }
+
+    .table-wrapper table {
+        width: 100%;
+    }
+</style>
+
+<script type="text/javascript">
+    var firstTime = true;
+
+    $(document).ready(function () {
+        updateData();
+        setInterval(updateData, 1500);
+    });
+
+    function stuff(item) {
+        var _message = $('#' + item).val();
+        postData(item, _message);
+    }
+
+    function postData(_to, _message) {
+        if (_to != "Select user" && _message.length > 0) {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("SendMessage", "Account")',
+                contentType: "application/json",
+                data: JSON.stringify({ message: _message, to: _to }),
+                dataType: "json",
+                success: function () { $('#' + _to).val(''); $('#' + _to).focus(); },
+                error: function () { alert("Somthing went wrong."); }
+            });
+        } else {
+            alert("Invalid message.");
+        }
+    }
+
+    function postNewData(_to, _message) {
+        if (_to != "Select user" && _message.length > 0) {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("SendMessage", "Account")',
+                contentType: "application/json",
+                data: JSON.stringify({ message: _message, to: _to }),
+                dataType: "json",
+                success: function () { window.location.href = '@Url.Content("~/Account/Messages")'; },
+                error: function () { alert("Somthing went wrong."); }
+            });
+        } else {
+            alert("Invalid message.");
+        }
+    }
+
+    function updateData() {
+        $.ajax({
+            type: "GET",
+            cache: false,
+            url: '@Url.Action("getOrganizedMessages", "Account")',
+            data: null,
+            datatype: "html",
+            success: function (data) {
+                if (firstTime == true) {
+                    $('#loadedData').html("<tr><td>" + data + "</tr></td>");
+                    $('.tableData').each(function () {
+                        var sendToWhom = $(this).attr('data-name');
+                        $('<table class="userInput" style="width:90%" align="center" cellpadding="0" cellspacing="0"><tr style="width:100%;"><td style="width:90%; position: relative; overflow: hidden;"><textarea style="resize:none; width:100%; overflow: auto; " id="' + sendToWhom + '" class="form-control" placeholder="Message"></textarea></td><td style="width:10%;" align="right"><center><input type="button" onclick="stuff(\'' + sendToWhom + '\')" class="' + sendToWhom + ' btn btn-lg btn-success" value="Send"/></center></td></tr><tr><td>&nbsp;</td></tr><tr><td>&nbsp;</td></tr><tr><td>&nbsp;</td></tr><tr><td>&nbsp;</td></tr></table>').insertAfter($(this));
+                        $('.tableData tr.innerClass td div.table-wrapper div.table-scroll').each(function () {
+                            $(this).scrollTop(9999);
+                        });
+                    });
+                    firstTime = false;
+
+                } else {
+                    var locations = [];
+                    var newData = [];
+                    var i = 0;
+                    var j = 0;
+                    var k = 0;
+                    $('.tableData tr.innerClass td div.table-wrapper div.table-scroll').each(function () {
+                        locations[i] = $(this).scrollTop();
+                        i++;
+                    });
+                    $(data).find('.innerClass').each(function () {
+                        if (k <= 3) {
+                            newData[k] = $(this).html();
+                            k++;
+                        }
+                    });
+                    $('.tableData tr.innerClass').each(function () {
+
+                        if ($(this).html() != newData[j]) {
+                            $(this).html(newData[j]);
+                            $('.table-scroll').each(function () {
+                                var test = 0;
+                                $(this).children().each(function () {
+                                    test = $(this).height();
+                                });
+                                var scrollBottom = Math.max(test - $(this).height() + 20, 0);
+                                $(this).scrollTop(scrollBottom);
+                            });
+                        }
+                        else {
+                            $(this).find('.table-scroll').scrollTop(locations[j]);
+                        }
+                        j++;
+                    });
+                }
+
+            }
+        });
+    }
+</script>
+
+<table style="width:100%;" align="center">
+    <tr>
+        <td>
+            <h2>Create New Message</h2>
+            @if (User.Identity.IsAuthenticated)
+            {
+
+                <table style="width:90%; background-color:lightgray; border-radius:10px" cellpadding="10" align="center">
+                    <tr>
+                        <td>@Html.DropDownList("data", null, "Select user", new { @class = "form-control" })</td>
+                    </tr>
+                    <tr><td><textarea style="resize:none;" id="newMessage" class="form-control" rows="1" cols="50" placeholder="Message" pattern=".{1,}"></textarea></td><td><button type="button" id="sendNewMessage" class="btn btn-success" onclick="postNewData($('#data option:selected').text(), $('#newMessage').val())">Send</button></td></tr>
+                </table>
+                <br />
+                <br />
+                <br />
+                <br />
+            <table id="loadedData" style="width:100%; align-content:center;table-layout: fixed;"></table>
+            }
+        </td>
+    </tr>
+</table>

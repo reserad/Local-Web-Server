@@ -1,0 +1,59 @@
+﻿@model Local_Web_Server.Models.User
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script>
+    $(document).ready(function () {
+        $('#frm').keypress(keypressHandler);
+        $(".form-control").keydown(function (e) {
+            if (e.which == 32) {
+                return false;
+            }
+        });
+        $('.form-control').bind("cut copy paste", function (e) {
+            e.preventDefault();
+        });
+    });
+    function keypressHandler(e) {
+        if (e.which == 13) {
+            $("frm").submit();
+        }
+    }
+
+    
+</script>
+
+<h2>Create Account</h2>
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "frm" }))
+{
+    <div>
+        <fieldset>
+            <div class="editor-label">
+                @Html.LabelFor(u => u.UserName)
+            </div>
+            <div class="editor-field">
+                @Html.TextBoxFor(u => u.UserName, new { pattern=".{5,}", @class = "form-control", @placeholder = "Username", required = "required" })
+                @Html.ValidationMessageFor(u => u.UserName)
+            </div>
+            <div class="editor-label">
+                @Html.LabelFor(u => u.Password)
+            </div>
+            <div class="editor-field">
+                @Html.PasswordFor(u => u.Password, new { pattern=".{5,}", @class = "form-control", @placeholder = "Password", required = "required" })
+                @Html.ValidationMessageFor(u => u.Password)
+            </div>
+            <div class="editor-label">
+                @Html.LabelFor(u => u.Email)
+            </div>
+            <div class="editor-field">
+                @Html.TextBoxFor(u => u.Email, new { pattern = ".{5,}", type = "email", @class = "form-control", @placeholder = "Email Address", required = "required" })
+                @Html.ValidationMessageFor(u => u.Email)
+            </div>
+            <br />
+            <input type="submit" value="Create Account" class="SubmitButton btn btn-success" />
+        </fieldset>
+    </div>
+}

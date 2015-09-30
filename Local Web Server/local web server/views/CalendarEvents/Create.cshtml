@@ -1,0 +1,171 @@
+﻿@model Local_Web_Server.Models.CalendarEvents
+
+@{
+    ViewBag.Title = "Create";
+}
+<script src="http://code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
+<link href="http://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
+<style>
+
+    .form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+        cursor:text;
+        background-color:white;
+    }
+    .tt-query {
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+     -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+.twitter-typeahead { width: 100%; } 
+.tt-hint {
+  color: #999
+}
+
+.tt-dropdown-menu {
+  width: 100%;
+  margin-top: 4px;
+  padding: 4px 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  -webkit-border-radius: 4px;
+     -moz-border-radius: 4px;
+          border-radius: 4px;
+  -webkit-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+     -moz-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+          box-shadow: 0 5px 10px rgba(0,0,0,.2);
+}
+
+.tt-suggestion {
+  padding: 3px 20px;
+  line-height: 24px;
+}
+
+.tt-suggestion.tt-cursor {
+  color: #fff;
+  background-color: #0097cf;
+
+}
+
+.tt-suggestion p {
+  margin: 0;
+}
+</style>
+<script>
+    $(document).ready(function () {
+        var datepicker = $("#datepicker").datepicker({
+            minDate: '@System.DateTime.Now'
+        });
+
+        var classes = [];
+        @{
+            Local_Web_Server.Models.CalendarEvents c = new Local_Web_Server.Models.CalendarEvents();
+            var AllEvents = c.getEvents();
+            List<string> usedClasses = new List<string>();
+            foreach (var _class in AllEvents) 
+            {
+                usedClasses.Add(_class.Class);
+            }
+          }
+
+        var substringMatcher = function(strs) {
+            return function findMatches(q, cb) {
+                var matches, substrRegex;
+ 
+                // an array that will be populated with substring matches
+                matches = [];
+ 
+                // regex used to determine if a string contains the substring `q`
+                substrRegex = new RegExp(q, 'i');
+ 
+                // iterate through the pool of strings and for any string that
+                // contains the substring `q`, add it to the `matches` array
+                $.each(strs, function(i, str) {
+                    if (substrRegex.test(str)) {
+                        // the typeahead jQuery plugin expects suggestions to a
+                        // JavaScript object, refer to typeahead docs for more info
+                        matches.push({ value: str });
+                    }
+                });
+ 
+                cb(matches);
+            };
+        };
+
+        classes = @Html.Raw(Json.Encode(usedClasses));
+        $('#class_search').typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 1
+        },
+{
+    name: 'classes',
+    displayKey: 'value',
+    source: substringMatcher(classes)
+});
+ });
+</script>
+
+<h2>Create Item</h2>
+
+
+@using (Html.BeginForm()) 
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            <div class="control-label col-md-2"> @Html.LabelFor(model => model.Assignment) / <b>Event</b></div>
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Assignment, new { htmlAttributes = new { @class = "form-control", @maxlength = "50", @autocomplete = "off" } })
+                @Html.ValidationMessageFor(model => model.Assignment, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="control-label col-md-2">@Html.LabelFor(model => model.Class) / <b>Location</b></div>
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Class, new { htmlAttributes = new { @class = "form-control typeahead", @id="class_search", @maxlength = "50", @autocomplete = "off" } })
+                @Html.ValidationMessageFor(model => model.Class, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Due_Date, "Date", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Due_Date, new { htmlAttributes = new { @class = "form-control", @id = "datepicker", @autocomplete = "off", @readonly = true } })
+
+               
+                @Html.ValidationMessageFor(model => model.Due_Date, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.SelectedRecurring, "Recurring", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+               @Html.DropDownListFor(Model => Model.SelectedRecurring,
+                  new SelectList(
+                  new List<Object>{
+                    new { Text = "Just This Time", Value = "1", Selected = true },
+                    new { Text = "Every Day", Value = "2"},
+                    new { Text = "Every Other Day", Value = "3" },
+                    new { Text = "Weekly", Value = "4" },
+                    new { Text = "Monthly", Value = "5" }},
+                    "text",
+                    "text",
+             1), new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.SelectedRecurring, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Create" class="btn btn-success" />
+                @Html.ActionLink(linkText: "Back to List", actionName: "Index", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            </div>
+        </div>
+    </div>
+}

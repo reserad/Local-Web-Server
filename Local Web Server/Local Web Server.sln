@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Local Web Server", "Local Web Server\Local Web Server.csproj", "{44257A1F-96C6-4E42-B3EC-81FF5D2F5877}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Helpers", "SHA1\Helpers.csproj", "{268AF6EC-CB0C-4BF0-95F2-94C63AE38938}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{44257A1F-96C6-4E42-B3EC-81FF5D2F5877}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44257A1F-96C6-4E42-B3EC-81FF5D2F5877}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44257A1F-96C6-4E42-B3EC-81FF5D2F5877}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44257A1F-96C6-4E42-B3EC-81FF5D2F5877}.Release|Any CPU.Build.0 = Release|Any CPU
+		{268AF6EC-CB0C-4BF0-95F2-94C63AE38938}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{268AF6EC-CB0C-4BF0-95F2-94C63AE38938}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{268AF6EC-CB0C-4BF0-95F2-94C63AE38938}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{268AF6EC-CB0C-4BF0-95F2-94C63AE38938}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,150 @@
+﻿@model IEnumerable<Local_Web_Server.Models.SurveyItems>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script>
+    $(document).ready(function () {
+        $(".delete").click(function (event) {
+            var Id = event.target.id;
+            $(".modal-body").attr('id', (Id));
+        });
+    });
+
+    function Delete() {
+        var Id = $(".modal-body").attr('id');
+        $.ajax({
+            type: "POST",
+            url: "/SurveyItems/Delete",
+            contentType: "application/json",
+            data: JSON.stringify({ id: Id }),
+            dataType: "json",
+            success: function () {
+                swal("Success!", "Content Deleted!", "success");
+                setTimeout("window.location.href = '@Url.Content("~/SurveyItems/Index/")'", 1000);
+            },
+            error: function () { sweetAlert("Error Son", "Something went wrong!", "error"); }
+        });
+    }
+</script>
+
+<h2>Expired Surveys</h2>
+<br />
+<p>
+    <a href="@Url.Action("Create", "SurveyItems")" class="btn-lg btn-success">Create <span class="glyphicon glyphicon-plus-sign"></span></a>
+    <a href="@Url.Action("Index", "SurveyItems")" class="btn-lg btn-primary">Recent Surveys <span class="glyphicon glyphicon-share-alt"></span></a>
+</p>
+<br />
+@for (int i = 0; i < Model.Count(); i++)
+{
+    var item = Model.ToList();
+    if (item[i].EndDate < System.DateTime.Now)
+    {
+        <div class="jumbotron" style="width:100%; border-radius:20px; background-color:#F8F8F8;">
+            <div class="container" style="width:100%">
+                <table style="width:100%">
+                    <tr>
+                        <td>
+                            <h1 style="font-size:48px">@Html.DisplayFor(modelItem => item[i].Title)</h1>
+                            <p style="font-size:16px; color:darkgray">Ended: @item[i].EndDate.ToString("MM/dd/yy")</p>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.RadioButton(item[i].Title, item[i].Option1, new { @disabled = "disabled" }) @item[i].Option1
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.RadioButton(item[i].Title, item[i].Option2, new { @disabled = "disabled" }) @item[i].Option2
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.RadioButton(item[i].Title, item[i].Option3, new { @disabled = "disabled" }) @item[i].Option3
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.RadioButton(item[i].Title, item[i].Option4, new { @disabled = "disabled" }) @item[i].Option4
+                        </td>
+                    </tr>
+                    <tr style="width:40%">
+                        <td>
+                            <br />
+                            <div class="progress">
+                                @{
+                                    decimal total = (Convert.ToDecimal(item[i].Score1) + Convert.ToDecimal(item[i].Score2) + Convert.ToDecimal(item[i].Score3) + Convert.ToDecimal(item[i].Score4));
+                                    decimal percent1 = 0;
+                                    decimal percent2 = 0;
+                                    decimal percent3 = 0;
+                                    decimal percent4 = 0;
+
+                                    if (Convert.ToDecimal(item[i].Score1) > 0)
+                                    {
+                                        percent1 = (Convert.ToDecimal(item[i].Score1) / total) * 100;
+                                    }
+
+                                    if (Convert.ToDecimal(item[i].Score2) > 0)
+                                    {
+                                        percent2 = (Convert.ToDecimal(item[i].Score2) / total) * 100;
+                                    }
+                                    if (Convert.ToDecimal(item[i].Score3) > 0)
+                                    {
+                                        percent3 = (Convert.ToDecimal(item[i].Score3) / total) * 100;
+                                    }
+                                    if (Convert.ToDecimal(item[i].Score4) > 0)
+                                    {
+                                        percent4 = (Convert.ToDecimal(item[i].Score4) / total) * 100;
+                                    }
+                                }
+                                <div class="progress-bar progress-bar-success active" style="width: @percent1%">
+                                    @if (percent1 > 0)
+                                    {
+                                        <div>@item[i].Option1 (@item[i].Score1)</div>
+                                    }
+                                </div>
+                                <div class="progress-bar progress-bar-warning progress-bar-striped" style="width: @percent2%">
+                                    @if (percent2 > 0)
+                                    {
+                                        <div>@item[i].Option2 (@item[i].Score2)</div>
+                                    }
+                                </div>
+                                <div class="progress-bar progress-bar-danger" style="width: @percent3%">
+                                    @if (percent3 > 0)
+                                    {
+                                        <div>@item[i].Option3 (@item[i].Score3)</div>
+                                    }
+                                </div>
+                                <div class="progress-bar progress-bar" style="width: @percent4%">
+                                    @if (percent4 > 0)
+                                    {
+                                        <div>@item[i].Option4 (@item[i].Score4)</div>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    }
+}
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">A wild verification window appears!</h4>
+            </div>
+            <div class="modal-body" id="">
+                Are you sure you want to delete this?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Nope Nope Nope</button>
+                <button type="button" class="btn btn-danger" onclick="Delete()" data-dismiss="modal">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>

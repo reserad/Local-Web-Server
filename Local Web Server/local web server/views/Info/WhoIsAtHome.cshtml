@@ -1,0 +1,163 @@
+﻿@using Local_Web_Server.Models
+@using Local_Web_Server.Controllers
+@model Local_Web_Server.Models.WhoIsOnlineModel
+@{
+    //ViewBag.Title = "WhoIsAtHome";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style type="text/css">
+    .username:hover, #date:hover {
+        cursor:pointer
+    }
+</style>
+<script type="text/javascript" src="~/Scripts/jquery.maskedinput.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+        $("#address").mask("**-**-**-**-**-**", { placeholder: "##-##-##-##-##-##" });
+        $('#dataTable').DataTable(
+            {
+                "paging": false,
+                "filter": false,
+                "info": false
+            });
+    });
+    function Delete(_id) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("deleteAddress", "Info")',
+            contentType: "application/json",
+            data: JSON.stringify({ id: _id }),
+            dataType: "json",
+            success: function () {
+                swal("Success!", "Content Deleted!", "success");
+                setTimeout("window.location.href = '@Url.Content("~/Info/WhoIsAtHome/")'", 1000);
+            },
+            error: function () { sweetAlert("Error Son", "Something went wrong!", "error"); }
+        });
+    }
+
+    function HostName(_ip) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("HostName", "Info")',
+            contentType: "application/json",
+            data: JSON.stringify({ ip: _ip }),
+            dataType: "json",
+            success: function (data) {
+                swal("Host Name!", data, "success");
+            },
+            error: function () { sweetAlert("Error Son", "Something went wrong!", "error"); }
+        });
+    }
+
+    function Create() {
+        var address = $("#address").val();
+        var type = $('#data option:selected').text()
+        if (location.length != 0 && type != "Select Device") {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("addAddress", "Info")',
+                contentType: "application/json",
+                data: JSON.stringify({ _address: address, _deviceType: type }),
+                dataType: "json",
+                success: function () {
+                    swal("Success!", "Mac Address Added!", "success");
+                    setTimeout("window.location.href = '@Url.Content("~/Info/WhoIsAtHome/")'", 1000);
+                },
+                error: function () { sweetAlert("Error Son", "Something went wrong!", "error"); }
+            });
+        }
+        else {
+            swal("Enter in all fields");
+        }
+    }
+</script>
+
+<h2>Who's At Home</h2>
+<table style="width:100%" class="table table-striped table-bordered" id="dataTable" align="center">
+    <thead style="background-color:#B8D4FF">
+        <tr>
+            <th></th>
+            <th>Mac Address</th>
+            <th>Device</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            WhoIsOnlineModel mac = new WhoIsOnlineModel();
+            List<WhoIsOnlineModel> RegisteredMacList = new List<WhoIsOnlineModel>();
+            RegisteredMacList = mac.getAddresses();
+            List<ComputerData> cd = new List<ComputerData>();
+            cd = MacAddressData.PutAllTogether();
+            foreach (var i in cd)
+            {
+                foreach (var m in RegisteredMacList)
+                {
+                    if (m.Address == i.Mac)
+                    {
+                        m.HostName = i.HostName;
+                        <tr style="height:100%;">
+                            @{Local_Web_Server.Models.User u = new Local_Web_Server.Models.User();
+                            string color = u.GetColorByUsername(m.Owner);
+                            }
+                            <td onclick="HostName('@i.IPAddress')" class="username" style="vertical-align:middle;word-break:break-all; background-color:@color; width:3%;">
+                                <div data-toggle="tooltip" title="@m.Owner" data-placement="right">@m.Owner.ToString()[0].ToString().ToUpper()</div>
+                            </td>
+                            <td style="vertical-align:middle">
+                                @m.Address
+                            </td>
+                            <td style="vertical-align:middle; width:15%">
+                                @m.DeviceType
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+
+        }
+    </table>
+
+    <a href="#" data-toggle="tooltip" title="Run CMD ->ipconfig /all -> Physical Address" data-placement="right">What's My Windows Mac Address?</a>
+    <br />
+    <a href="#" data-toggle="tooltip" title="Settings ->WiFi ->Advanced -> Mac Address" data-placement="right">What's My Android Mac Address?</a>
+    @Html.EditorFor(model => model.Address, new { htmlAttributes = new { @class = "form-control", @maxlength = "50", @placeholder = "Mac Address", @id = "address", @size = "17" } })
+    @Html.DropDownList("data", null, "Select Device", new { @class = "form-control" })
+    <button type="button" onclick="Create()" class="btn btn-lg btn-success">Create</button>
+    <br />
+    <br />
+
+    @if (cd.Count != null)
+    {
+        <h2>All Mac Addresses</h2>
+        <table style="width:100%" class="table table-striped table-bordered" id="dataTable" align="center">
+            <thead style="background-color:#B8D4FF">
+                <tr>
+                    <th></th>
+                    <th>Mac Address</th>
+                    <th style="text-align:center;">Device</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in RegisteredMacList)
+                {
+                    Local_Web_Server.Models.User u = new Local_Web_Server.Models.User();
+                    string color = u.GetColorByUsername(item.Owner);
+                    <tr style="height:100%; width:100%;">
+                        <td class="username" style="vertical-align:middle;word-break:break-all; background-color:@color; width:3%; text-align:center;">
+                            <div data-toggle="tooltip" title="@item.Owner" data-placement="right">@item.Owner.ToString()[0].ToString().ToUpper()</div>
+                        </td>
+                        <td style="vertical-align:middle">
+                            @item.Address
+                        </td>
+                        <td style="vertical-align:middle; width:15%; text-align:center;">
+                            @item.DeviceType
+                        </td>
+                        <td style="vertical-align:middle; width:5%;" align="center"><button type="button" class="delete btn btn-danger" onclick="Delete(@item.Id)"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }

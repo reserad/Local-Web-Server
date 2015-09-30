@@ -1,0 +1,10 @@
+C:\Users\Alec\Documents\Visual Studio 2013\Projects\Local Web Server\SHA1\bin\Debug\SHA1.dll
+C:\Users\Alec\Documents\Visual Studio 2013\Projects\Local Web Server\SHA1\bin\Debug\SHA1.pdb
+C:\Users\Alec\Documents\Visual Studio 2013\Projects\Local Web Server\SHA1\obj\Debug\SHA1.dll
+C:\Users\Alec\Documents\Visual Studio 2013\Projects\Local Web Server\SHA1\obj\Debug\SHA1.pdb
+C:\Users\Alec\Documents\Visual Studio 2013\Projects\Local Web Server\SHA1\obj\Debug\Helpers.csprojResolveAssemblyReference.cache
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\SHA1\bin\Debug\SHA1.dll
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\SHA1\bin\Debug\SHA1.pdb
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\SHA1\obj\Debug\Helpers.csprojResolveAssemblyReference.cache
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\SHA1\obj\Debug\SHA1.dll
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\SHA1\obj\Debug\SHA1.pdb

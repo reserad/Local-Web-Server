@@ -1,0 +1,306 @@
+﻿@model Local_Web_Server.Models.FileZone
+
+@{
+    ViewBag.Title = "FileZone";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="~/Content/dropzone.css">
+<style>
+    .dropzone {
+        border: 2px dashed #0087F7;
+        border-radius: 5px;
+        background: white;
+    }
+
+        .dropzone .dz-message {
+            font-weight: 400;
+            color: #646C7F;
+            font-size: x-large;
+            font-family: Roboto, "Open Sans", sans-serif;
+        }
+
+    .box {
+        display: none;
+        width: 100%;
+    }
+    a:hover + .box, .box:hover {
+        display: block;
+        position: relative;
+        z-index: 100;
+    }
+
+    .imgPreview {
+        display: none;
+        width: 100%;
+    }
+    a:hover + .imgPreview, .imgPreview:hover {
+        display: block;
+        position: relative;
+        z-index: 100;
+    }
+</style>
+
+<script src="~/Scripts/dropzone.js"></script>
+
+<script type="text/javascript">
+    var uploadLocation = "";
+    $(document).ready(function () {
+        //Dropzone.autoDiscover = false;
+        //$("#zone").dropzone({ url: "/Media/FileZone" });
+
+        //File Upload response from the server
+        Dropzone.options.zone = {
+            paramName: "file",
+            maxFilesize: 500,
+            init: function () {
+                this.on("complete", function (file) {
+                    updateData();
+                });
+            }
+        };
+
+        var table = $('#dataTable').DataTable(
+            {
+                "paging": false,
+                "filter": false,
+                "info": false
+            });
+        updateData();
+    });
+
+    function ChangeDirectory(element) {
+        uploadLocation = $(element).attr("id");
+        $("#SelectedDirectory").val(uploadLocation);
+        updateData();
+    }
+
+    function folderClick(element) {
+        
+        $('td').each(function (n, e) {
+            if ($(e).not(element).find(".box").is(":visible"))
+            {
+                $(e).find(".box").toggle();
+            }
+        });
+        $(element).find('.box').toggle();
+    }
+
+    function DeleteClick(event) {
+        var Id = $(event).attr('id');
+        $(".modal-body").attr('id', (Id));
+    }
+
+    function Delete() {
+        var Id = $(".modal-body").attr('id');
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("Delete", "Media")',
+            contentType: "application/json",
+            data: JSON.stringify({location: uploadLocation, FileName: Id }),
+            dataType: "json",
+            success: function () {
+                updateData();
+            },
+            error: function () { sweetAlert("Error Son", "Something went wrong!", "error"); }
+        });
+    }
+
+    function DeleteFolder() {
+        var Id = $(".folder").attr('id');
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("DeleteFolder", "Media")',
+            contentType: "application/json",
+            data: JSON.stringify({ path: Id }),
+            dataType: "json",
+            success: function () {
+                updateData();
+            },
+            error: function () { sweetAlert("Error Son", "Something went wrong!", "error"); }
+        });
+    }
+
+    function createFolder() {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("CreateFolder", "Media")',
+            contentType: "application/json",
+            data: JSON.stringify({location: uploadLocation}),
+            dataType: "json",
+            success: function () {
+                updateData();
+            },
+            error: function () { sweetAlert("Error Son", "Something went wrong!", "error"); }
+        });
+    }
+
+    function RenameFolder() {
+        var _path = $(".FolderRename").attr('id');
+        var _to = $("#renameField").val();
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("RenameFolder", "Media")',
+            contentType: "application/json",
+            data: JSON.stringify({path: _path, to: _to}),
+            dataType: "json",
+            success: function () {
+                updateData();
+            },
+            error: function () { sweetAlert("Error Son", "Something went wrong!", "error"); }
+        });
+    }
+
+    function renameClick()
+    {
+        var Id = event.target.id;
+        $(".modal-body").attr('id', (Id));
+
+        var cut = 0;
+        for (var i = Id.length - 1; i > 0; i--) {
+            if (Id[i] == '\\') {
+                cut = i;
+                break;
+            }
+        }
+        var temp = Id.substring(1 + cut);
+        $("#renameField").val(temp);
+    }
+
+    function navigateBack() {
+
+        var cut = 0;
+        for (var i = uploadLocation.length - 1; i > 0; i--) {
+            if (uploadLocation[i] == '\\') {
+                cut = i;
+                break;
+            }
+        }
+        var temp = uploadLocation.substring(0, cut);
+
+        @{string derp = @Server.MapPath(@"\\\\").ToString();}
+            @{string newDerp = "";
+                for(int i = 0; i < derp.Length; i++)
+              {
+                  newDerp += derp[i];
+                  if (derp[i] == '\\') 
+                  {
+                      newDerp += @"\";
+                  }
+                  
+              }}
+
+    var _loc = "@newDerp";
+        _loc = _loc + "FileZone";
+
+    if (uploadLocation != _loc)
+    {
+        uploadLocation = temp;
+        $("#SelectedDirectory").val(uploadLocation);
+        updateData();
+    }
+    }
+
+    function updateData() {
+
+        $.ajax({
+            type: "POST",
+            contentType: "application/json",
+            url: '@Url.Action("partialFileZone", "Media")',
+            data: JSON.stringify({folder: uploadLocation}),
+            datatype: "JSON",
+            success: function (data) {
+                $('#loadedData').html(data);
+
+                var path = uploadLocation;
+                var homeFileLocation = "@newDerp";
+                homeFileLocation = homeFileLocation + "FileZone";
+                var newPath = "\\";
+                if (path.length > homeFileLocation.length)
+                {
+                    newPath = path.substring(homeFileLocation.length, path.length);
+                    $("#backBtn").prop("disabled", false);
+                }
+                else
+                    $("#backBtn").prop("disabled", true);
+
+                $("#displayedPath").html(newPath);
+            }
+        });
+    }
+</script>
+<br/>
+<table style="width:100%">
+    <tr>
+        <td align="center">
+            <form id="zone" class="dropzone" style="width:90%;" action="@Url.Action("FileZone", "Media")">
+                @Html.TextBoxFor(model => model.CurrentDirectory, new { @id = "SelectedDirectory", @style = "display: none;" })
+            </form>
+</td>
+    </tr>
+    <tr><td>&nbsp;</td></tr>
+    <tr style="width:90%;"><td style="padding-left:5%"><button class="btn btn-lg btn-info" onclick="createFolder()">Create Folder  <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span></button><button id="backBtn" class="btn btn-lg btn-default" onclick="navigateBack()">Back <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span></button></td></tr>
+    @{
+        <tr style="width:90%;"><td style="padding-left:5%" id="displayedPath"></td></tr>
+    }
+    <tr><td></td></tr>
+    <tr>
+        <td id="loadedData"></td>
+    </tr>
+</table>
+<br />
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">A wild verification window appears!</h4>
+            </div>
+            <div class="modal-body" id="">
+                Are you sure you want to delete this file?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Nope Nope Nope</button>
+                <button type="button" class="btn btn-danger" onclick="Delete()" data-dismiss="modal">Delete File</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="folderModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">A wild verification window appears!</h4>
+            </div>
+            <div class="modal-body folder" id="">
+                Are you sure you want to delete this folder?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Nope Nope Nope</button>
+                <button type="button" class="btn btn-danger" onclick="DeleteFolder()" data-dismiss="modal">Delete Folder</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="renameModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">A wild verification window appears!</h4>
+            </div>
+            <div class="modal-body FolderRename" id="">
+                <input type="text" id="renameField" value="" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Back</button>
+                <button type="button" class="btn btn-danger" onclick="RenameFolder()" data-dismiss="modal">Rename Folder</button>
+            </div>
+        </div>
+    </div>
+</div>

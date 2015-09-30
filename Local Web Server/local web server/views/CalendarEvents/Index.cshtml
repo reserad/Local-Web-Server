@@ -1,0 +1,157 @@
+﻿@model IEnumerable<Local_Web_Server.Models.CalendarEvents>
+
+@{
+    ViewBag.Title = "Upcomming events";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+    .dataTables_filter {
+        display: none;
+    }
+    .username:hover, #date:hover {
+        cursor:pointer
+    }
+</style>
+
+<link href="http://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
+
+<script>
+    $.fn.dataTable.ext.search.push(
+    function (settings, data, dataIndex) {
+        var date = $('#date').val();
+        var due = data[3]; // use data for the age column
+
+        if (new Date(date).getTime() <= new Date(due).getTime()) {
+            return true;
+        }
+        return false;
+    }
+);
+
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+
+    var table = $('#dataTable').DataTable(
+        {
+            "paging": false,
+            "info": false
+        });
+    $("#date").datepicker();
+
+    $('#date').datepicker().change(function ()
+    {
+        table.draw();
+    });
+    $(".username").each(function () {
+        var user = $(this).attr('data-id');
+        var _color = $(this).attr('data-color');
+        var similar = shadeColor1(_color, 15);
+        $(this).css('background', 'linear-gradient(' + similar + ', ' + _color + ')');
+    });
+
+    $(".delete").click(function (event) {
+        var Id = $(this).attr('id');
+        $(".modal-body").attr('id', (Id));
+    });
+});
+
+function Delete() {
+    var Id = $(".modal-body").attr('id');
+    $.ajax({
+        type: "POST",
+        url: "/CalendarEvents/Delete/",
+        contentType: "application/json",
+        data: JSON.stringify({ id: Id }),
+        dataType: "json",
+        success: function () {
+            swal("Success!", "Content Deleted!", "success");
+            setTimeout("window.location.href = '@Url.Content("~/CalendarEvents/Index/")'", 1000);
+        },
+        error: function () { sweetAlert("Error Son", "Something went wrong!", "error"); }
+    });
+}
+
+    function shadeColor1(color, percent) {
+        var num = parseInt(color.slice(1), 16), amt = Math.round(2.55 * percent), R = (num >> 16) + amt, G = (num >> 8 & 0x00FF) + amt, B = (num & 0x0000FF) + amt;
+        return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 + (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 + (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+    }
+
+</script>
+
+<h1>Upcomming Stuff</h1>
+<br />
+<p>
+    <a href="@Url.Action("Create", "CalendarEvents")" class="btn-lg btn-primary" style="text-decoration: none;">New Assignment <span class="glyphicon glyphicon-plus-sign"></span></a>
+</p>
+<br/>
+<table border="0" cellspacing="5" cellpadding="5">
+    <tbody>
+        <tr>
+            <td>Filter Date:</td>
+            <td><input type="text" id="date" readonly value="@System.DateTime.Now.ToString("M/dd/yyyy")"></td>
+        </tr>
+    </tbody>
+</table>
+<table class="table table-striped table-bordered" id="dataTable">
+    
+    <thead style="background-color:#B8D4FF">
+        <tr>
+            <th>
+            </th>
+            <th style="vertical-align:middle;">
+                @Html.DisplayNameFor(model => model.Assignment) / Event
+            </th>
+            <th style="vertical-align:middle;text-align:center">
+                @Html.DisplayNameFor(model => model.Class) / Location
+            </th>
+            <th style="vertical-align:middle;text-align:center">
+                Date
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                @{Local_Web_Server.Models.User u = new Local_Web_Server.Models.User();
+                    string color = u.GetColorByUsername(item.Creator);
+                }
+                <td style="width:3%; vertical-align:middle" align="center" class="username" data-id="@item.Creator" data-color="@color">
+                    <div style="width:100%; height:100%;" data-toggle="tooltip" title="@item.Creator" data-placement="right">@item.Creator.ToString()[0].ToString().ToUpper()</div>
+                </td>
+                <td style="vertical-align:middle">
+                    @Html.DisplayFor(modelItem => item.Assignment) <div style="font-size:10px; color:darkgray">@item.SelectedRecurring</div>
+                </td>
+                <td style="width:15%; vertical-align:middle" align="center">
+                    @Html.DisplayFor(modelItem => item.Class)
+                </td>
+                <td style="width:10%; vertical-align:middle" align="center">
+                    @item.Due_Date.ToString("MM/dd/yy")
+                </td>
+                <td style="width:10%; vertical-align:middle;" align="center">
+                    <a href="@Url.Action("Edit\\" + item.ID, "CalendarEvents")" class="btn btn-success"><span class="glyphicon glyphicon-cog"></span></a>
+                    <button type="button" data-toggle="modal" data-target="#myModal" id="@item.ID" class="delete btn btn-danger"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">A wild verification window appears!</h4>
+            </div>
+            <div class="modal-body" id="">
+                Are you sure you want to delete this?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Nope Nope Nope</button>
+                <button type="button" class="btn btn-danger" onclick="Delete()" data-dismiss="modal">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
