@@ -189,24 +189,19 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\CalendarEventsController.cs" />
-    <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\InfoController.cs" />
     <Compile Include="Controllers\MacAddressData.cs" />
     <Compile Include="Controllers\SecurityController.cs" />
     <Compile Include="Controllers\MediaController.cs" />
     <Compile Include="Controllers\SurveyItemsController.cs" />
-    <Compile Include="Controllers\TestController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\ComputerDataModel.cs" />
-    <Compile Include="Models\SecurityCamModel.cs" />
     <Compile Include="Models\FileZoneModel.cs" />
     <Compile Include="Models\CalendarEvents.cs" />
     <Compile Include="Models\MessagePageModel.cs" />
     <Compile Include="Models\MessagesModel.cs" />
-    <Compile Include="Models\SecurityModel.cs" />
-    <Compile Include="Models\SelectedFileDirectoryModel.cs" />
     <Compile Include="Models\SettingsModel.cs" />
     <Compile Include="Models\SpotifyModel.cs" />
     <Compile Include="Models\SurveyItems.cs" />
@@ -220,7 +215,6 @@
     <Content Include="App_Data\Database_log.ldf">
       <DependentUpon>Database.mdf</DependentUpon>
     </Content>
-    <Content Include="Content\ajax-loader.gif" />
     <Content Include="Content\bg.jpg" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
@@ -231,7 +225,6 @@
     <Content Include="Content\sweet-alert.css" />
     <Content Include="Content\trianglify-background.svg" />
     <Content Include="favicon.ico" />
-    <Content Include="FileZone\New Folder\Bearcat ninja kick.mp4" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
@@ -239,7 +232,6 @@
     <Content Include="Scripts\bootstrap.min.js" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\classie.js" />
-    <Content Include="Scripts\DecoderWorker.js" />
     <Content Include="Scripts\dropzone.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
@@ -253,13 +245,10 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\main.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
-    <Content Include="Scripts\qrcodelib.js" />
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
     <Content Include="Scripts\sweet-alert.min.js" />
     <Content Include="Scripts\typeahead.bundle.js" />
-    <Content Include="Scripts\WebCodeCam.js" />
-    <Content Include="Scripts\WebCodeCam.min.js" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
@@ -289,12 +278,11 @@
     <Content Include="Views\Account\getOrganizedMessages.cshtml" />
     <Content Include="Views\Security\SecurityCam.cshtml" />
     <Content Include="Views\Info\WhoIsAtHome.cshtml" />
-    <Content Include="Views\Security\Locks.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Media\partialFileZone.cshtml" />
     <Content Include="Scripts\progressbar.min.js.map" />
     <Content Include="Views\Shared\ShortDateTime.cshtml" />
-    <Content Include="Views\Test\Index.cshtml" />
+    <Content Include="Views\Media\Music.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SHA1\Helpers.csproj">
@@ -310,11 +298,8 @@
     <None Include="Project_Readme.html" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="FileZone\New Folder 1\" />
-    <Folder Include="FileZone\New Folder 2\" />
-    <Folder Include="FileZone\New Folder 3\" />
-    <Folder Include="FileZone\New Folder 4\" />
-    <Folder Include="FileZone\New Folder 5\" />
+    <Folder Include="FileZone\" />
+    <Folder Include="Views\Test\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -54,6 +54,8 @@
                                             <li>@Html.ActionLink("Plex", "Plex", "Media")</li>
                                             <li class="divider"></li>
                                             <li>@Html.ActionLink("File Zone", "FileZone", "Media")</li>
+                                            <li class="divider"></li>
+                                            <li>@Html.ActionLink("Spotify Music", "Music", "Media")</li>
                                         </ul>
                                     </li>
                                     <li>@Html.ActionLink("Cameras", "SecurityCam", "Security")</li>
@@ -84,7 +86,7 @@
         </tr>
         <tr>
             <td>
-                <div style="text-align:center; padding-right:15px; background: rgba(130, 207, 100, .2); border-bottom-right-radius: 12px;
+                <div class="UserInfo" style="text-align:center; padding-right:15px; background: rgba(130, 207, 100, .2); border-bottom-right-radius: 12px;
     border-bottom-left-radius: 12px;">
                     @{
                         if (User.Identity.IsAuthenticated)

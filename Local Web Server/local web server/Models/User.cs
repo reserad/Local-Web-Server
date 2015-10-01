@@ -4,8 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
-using System.Linq;
-using System.Web;
 
 namespace Local_Web_Server.Models
 {
@@ -26,12 +24,6 @@ namespace Local_Web_Server.Models
         [Display(Name = "LastAtivity")]
         public DateTime LastActivity { get; set; }
 
-        /// <summary>
-        /// Checks if user with given password exists in the database
-        /// </summary>
-        /// <param name="_username">User name</param>
-        /// <param name="_password">User password</param>
-        /// <returns>True if user exist and password is correct</returns>
         public bool IsValid(string _username, string _password)
         {
             using (var cn = new SqlConnection(@"Data Source=(LocalDB)\v11.0;AttachDbFilename" +

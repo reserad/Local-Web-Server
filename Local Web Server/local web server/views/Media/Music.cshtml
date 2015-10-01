@@ -1,4 +1,6 @@
-﻿@model Local_Web_Server.Models.SpotifyModel
+﻿@using SpotifyAPI.Local
+@using SpotifyAPI.Local.Models
+@model Local_Web_Server.Models.SpotifyModel
 @{
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -6,11 +8,30 @@
 
 <script>
     function Skip() {
+        @{
+            Track _currentTrack = new Track();
+            SpotifyLocalAPI _spotifyLocal = new SpotifyLocalAPI();
+            bool successful = _spotifyLocal.Connect();
+            if (successful)
+            {
+                StatusResponse status = _spotifyLocal.GetStatus();
+
+                if (status != null && status.Track != null && status.Track.Length != 0)
+                {
+                    _currentTrack = status.Track;
+                    if (!_currentTrack.TrackResource.Name.Equals(Model.SongTitle))
+                    {
+                        Model.SongTitle = _currentTrack.TrackResource.Name;
+                    }
+                }
+            }
+        }
+        var selected = $('.PlayListItem :selected').text();
         $.ajax({
             type: "POST",
-            url: "/Test/VoteSkip/",
+            url: "/Media/VoteSkip/",
             contentType: "application/json",
-            data: {},
+            data: JSON.stringify({ "SongRecommendation": selected, "SongThatWasPlaying": '@Model.SongTitle' }),
             dataType: "json",
             success: function() {
                 swal("Success!", "Thank you for your suggestion!", "success");
@@ -20,16 +41,19 @@
     }
 </script>
 <style>
-    .customTable
-    {
-        background-color: white;
-        -webkit-border-bottom-left-radius: 10px;
-        -webkit-border-bottom-right-radius: 10px;
-        -moz-border-bottom-left-radius: 10px;
-        -moz-border-bottom-right-radius: 10px;
-        border-bottom-left-radius: 10px;
-        border-bottom-right-radius: 10px;
+    .UserInfo {
+        display: none;
     }
+     .customTable
+     {
+         background-color: white;
+         -webkit-border-bottom-left-radius: 10px;
+         -webkit-border-bottom-right-radius: 10px;
+         -moz-border-bottom-left-radius: 10px;
+         -moz-border-bottom-right-radius: 10px;
+         border-bottom-left-radius: 10px;
+         border-bottom-right-radius: 10px;
+     }
     body {
         background-color: #282828;
     }
@@ -53,8 +77,6 @@
     @{
         if (!Model.Empty)
         {
-
-
             List<SelectListItem> sl = new List<SelectListItem>();
             foreach (var song in Model.Tracks)
             {
@@ -67,7 +89,7 @@
                 sl.Add(selectListItem);
             }
             <div></div>
-            <table style="width: 100%"><tr><td>@Html.DropDownListFor(m => m.ChosenSong, sl, new {@class = "form-control"})</td><td><button class="btn btn-info" onclick="Skip()">Vote <span class="glyphicon glyphicon-thumbs-down"></span></button></td></tr></table>
+            <table style="width: 100%"><tr><td>@Html.DropDownListFor(m => m.ChosenSong, sl, new {@class = "form-control PlayListItem"})</td><td><button class="btn btn-info" onclick="Skip()">Vote <span class="glyphicon glyphicon-thumbs-down"></span></button></td></tr></table>
         }
     }
 </div>
