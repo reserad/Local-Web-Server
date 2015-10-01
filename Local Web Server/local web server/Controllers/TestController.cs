@@ -68,10 +68,31 @@ namespace Local_Web_Server.Controllers
                 var stream = new MemoryStream();
                 derp.Save(stream, ImageFormat.Png);
                 imgFile = stream.ToArray();
-                sm.SongAlbumArt = imgFile;
+                sm.SongAlbumArt = _currentTrack.GetAlbumArtUrl(AlbumArtSize.Size320);
                 sm.IsPlaying = true;
                 stream.Close();
                 sm.Tracks = GetPlaylists();
+                int index = 0;
+                foreach (var track in sm.Tracks)
+                {
+                    if (track.title.Equals(_currentTrack.TrackResource.Name))
+                    {
+                        break;
+                    }
+                    index++;
+                }
+                if (index == 0)
+                    index++;
+                sm.PreviousSongAlbumArt = sm.Tracks[index - 1].albumArt;
+                sm.PreviousSongTitle = sm.Tracks[index - 1].title;
+                sm.PreviousSongArtist = sm.Tracks[index - 1].artist;
+                if (index + 1 >= sm.Tracks.Count)
+                    index = 0;
+                else
+                    index++;
+                sm.NextSongAlbumArt = sm.Tracks[index].albumArt;
+                sm.NextSongTitle = sm.Tracks[index].title;
+                sm.NextSongArtist = sm.Tracks[index].artist;
                 _auth = null;
                 _spotifyLocal = null;
                 _spotify = null;
@@ -120,6 +141,7 @@ namespace Local_Web_Server.Controllers
                     td.title = details.Items[i].Track.Name;
                     td.artist = details.Items[i].Track.Artists[0].Name;
                     td.album = details.Items[i].Track.Album.Name;
+                    td.albumArt = details.Items[i].Track.Album.Images[1].Url;
                     listedTracks.Add(td);
                 }
             }
@@ -127,10 +149,16 @@ namespace Local_Web_Server.Controllers
         }
 
         [HttpPost]
-        public JsonResult VoteSkip(SpotifyLocalAPI spotify)
+        public JsonResult VoteSkip()
         {
-            spotify.Skip();
-            return Json(true);
+            _spotifyLocal = new SpotifyLocalAPI();
+            bool successful = _spotifyLocal.Connect();
+            if (successful)
+            {
+                _spotifyLocal.ListenForEvents = true;
+                _spotifyLocal.Skip();
+            }
+            return Json(true, JsonRequestBehavior.AllowGet);
         }
 
         public void UpdateInfos()

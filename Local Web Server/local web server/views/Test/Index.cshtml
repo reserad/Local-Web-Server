@@ -12,32 +12,62 @@
             contentType: "application/json",
             data: {},
             dataType: "json",
-            success: function () {
+            success: function() {
                 swal("Success!", "Thank you for your suggestion!", "success");
             },
-            error: function () { sweetAlert("Error Son", "Something went wrong!", "error"); }
+            error: function() { sweetAlert("Error Son", "Something went wrong!", "error"); }
         });
     }
 </script>
-<h2>@Model.SongTitle - @Model.SongArtist</h2>
-@{ var str = Convert.ToBase64String(Model.SongAlbumArt); }
-<img src="data:image/png;base64,@str " alt="Red dot">
-
-@{
-    if (!Model.Empty)
+<style>
+    .customTable
     {
-        <button class="btn btn-info" onclick="Skip()">Vote To Skip <span class="glyphicon glyphicon-thumbs-down"></span></button>
-        List<SelectListItem> sl = new List<SelectListItem>();
-        foreach (var song in Model.Tracks)
-        {
-            SelectListItem selectListItem = new SelectListItem()
-            {
-                Text = song.title + " - " + song.artist,
-                Value = song.title,
-                Selected = false
-            };
-            sl.Add(selectListItem);
-        }
-        @Html.DropDownListFor(m => m.ChosenSong, sl, new { @class = "form-control" })
+        background-color: white;
+        -webkit-border-bottom-left-radius: 10px;
+        -webkit-border-bottom-right-radius: 10px;
+        -moz-border-bottom-left-radius: 10px;
+        -moz-border-bottom-right-radius: 10px;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
     }
-}
+    body {
+        background-color: #282828;
+    }
+    .autoResizeImage
+    {
+        max-width: 100%;
+        height: auto;
+        width: 100%;
+    }
+</style>
+<br/>
+<div class="alert alert-info" role="alert">Here's what's playing. Don't like it? Vote below!</div>
+<table class="table customTable" style="width: 100%; table-layout: fixed;">
+    <tr style="height: 50%; width:100%"><td style="width: 30%"><img class="autoResizeImage" src="@Model.PreviousSongAlbumArt"></td><td style="width: 40%"><img class="autoResizeImage" src="@Model.SongAlbumArt"></td><td style="width: 30%"><img class="autoResizeImage" src="@Model.NextSongAlbumArt"></td></tr>
+    <tr style="height: 50%"><td style="width: 30%;">@Model.PreviousSongTitle <br/> <i>@Model.PreviousSongArtist</i></td><td style="width: 40%; color:lightseagreen">@Model.SongTitle <br /><i> @Model.SongArtist</i></td><td style="width: 30%; font-size: small">@Model.NextSongTitle <br /> <i>@Model.NextSongArtist</i></td></tr>
+</table>
+
+
+<div class="alert alert-warning" role="alert">Here's what we got to choose from:</div>
+<div class="table customTable">
+    @{
+        if (!Model.Empty)
+        {
+
+
+            List<SelectListItem> sl = new List<SelectListItem>();
+            foreach (var song in Model.Tracks)
+            {
+                SelectListItem selectListItem = new SelectListItem()
+                {
+                    Text = song.title + " - " + song.artist,
+                    Value = song.title,
+                    Selected = false
+                };
+                sl.Add(selectListItem);
+            }
+            <div></div>
+            <table style="width: 100%"><tr><td>@Html.DropDownListFor(m => m.ChosenSong, sl, new {@class = "form-control"})</td><td><button class="btn btn-info" onclick="Skip()">Vote <span class="glyphicon glyphicon-thumbs-down"></span></button></td></tr></table>
+        }
+    }
+</div>
