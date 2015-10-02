@@ -12,3 +12,4 @@ C:\Users\areser\Documents\GitHub\Local-Web-Server\Local Web Server\SHA1\bin\Debu
 C:\Users\areser\Documents\GitHub\Local-Web-Server\Local Web Server\SHA1\bin\Debug\SHA1.pdb
 C:\Users\areser\Documents\GitHub\Local-Web-Server\Local Web Server\SHA1\obj\Debug\SHA1.dll
 C:\Users\areser\Documents\GitHub\Local-Web-Server\Local Web Server\SHA1\obj\Debug\SHA1.pdb
+C:\Users\areser\Documents\GitHub\Local-Web-Server\Local Web Server\SHA1\obj\Debug\Helpers.csprojResolveAssemblyReference.cache

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Text;
+using SpotifyAPI.Web.Models;
 
 namespace Local_Web_Server.Models
 {
@@ -20,6 +21,7 @@ namespace Local_Web_Server.Models
         public string SongRecommendation;
         public DateTime Time;
         public string SongThatWasPlaying;
+        public string IP;
     }
 
     public class SpotifyModel
@@ -47,14 +49,14 @@ namespace Local_Web_Server.Models
                     string.IsNullOrWhiteSpace(SongArtist));
             }
         }
-        public void CreateVoteEntry(string SongRecommendation, DateTime Time, string SongThatWasPlaying)
+        public void CreateVoteEntry(string SongRecommendation, DateTime Time, string SongThatWasPlaying, string IP)
         {
             using (var cn = new SqlConnection(@"Data Source=(LocalDB)\v11.0;AttachDbFilename" +
             "=|DataDirectory|\\Database.mdf; Integrated Security=True"))
             {
                 string _insertSql = @"INSERT INTO [dbo].[Spotify] 
-                                    ([SongRecommendation], [Time], [SongThatWasPlaying])
-                                    VALUES (@sr, @t, @sp)";
+                                    ([SongRecommendation], [Time], [SongThatWasPlaying], [IP])
+                                    VALUES (@sr, @t, @sp, @ip)";
                 var insertCmd = new SqlCommand(_insertSql, cn);
                 insertCmd.Parameters
                     .Add(new SqlParameter("@sr", SqlDbType.VarChar))
@@ -65,6 +67,9 @@ namespace Local_Web_Server.Models
                 insertCmd.Parameters
                     .Add(new SqlParameter("@sp", SqlDbType.VarChar))
                     .Value = SongThatWasPlaying;
+                insertCmd.Parameters
+                    .Add(new SqlParameter("@ip", SqlDbType.VarChar))
+                    .Value = IP;
                 cn.Open();
                 insertCmd.ExecuteNonQuery();
             }
@@ -75,7 +80,7 @@ namespace Local_Web_Server.Models
             using (var cn = new SqlConnection(@"Data Source=(LocalDB)\v11.0;AttachDbFilename" +
              "=|DataDirectory|\\Database.mdf; Integrated Security=True"))
             {
-                string _sql = @"SELECT [SongRecommendation], [Time], [SongThatWasPlaying] FROM [dbo].[Spotify]";
+                string _sql = @"SELECT [SongRecommendation], [Time], [SongThatWasPlaying], [IP] FROM [dbo].[Spotify]";
                 var cmd = new SqlCommand(_sql, cn);
                 cn.Open();
                 var reader = cmd.ExecuteReader();
@@ -88,6 +93,7 @@ namespace Local_Web_Server.Models
                         d.SongRecommendation = reader["SongRecommendation"].ToString();
                         d.Time = Convert.ToDateTime(reader["Time"].ToString());
                         d.SongThatWasPlaying = reader["SongThatWasPlaying"].ToString();
+                        d.IP = reader["IP"].ToString();
                         data.Add(d);
                     }
                     reader.Dispose();
@@ -101,12 +107,112 @@ namespace Local_Web_Server.Models
             }
         }
 
+        public bool IsValidVote(string IP)
+        {
+            using (var cn = new SqlConnection(@"Data Source=(LocalDB)\v11.0;AttachDbFilename" +
+             "=|DataDirectory|\\Database.mdf; Integrated Security=True"))
+            {
+                string _sql = @"SELECT [IP] FROM [dbo].[Spotify] WHERE [IP] = @ip";
+                var cmd = new SqlCommand(_sql, cn);
+                cmd.Parameters
+                    .Add(new SqlParameter("@ip", SqlDbType.NVarChar))
+                    .Value = IP;
+                cn.Open();
+                var reader = cmd.ExecuteReader();
+                if (!reader.HasRows)
+                {
+                    cmd.Dispose();
+                    return true;
+                }
+                cmd.Dispose();
+                return false;
+            }
+        }
+
         public void Truncate()
         {
             using (var cn = new SqlConnection(@"Data Source=(LocalDB)\v11.0;AttachDbFilename" +
              "=|DataDirectory|\\Database.mdf; Integrated Security=True"))
             {
                 string _sql = @"TRUNCATE TABLE Spotify";
+                var cmd = new SqlCommand(_sql, cn);
+                cn.Open();
+                var reader = cmd.ExecuteReader();
+                reader.Dispose();
+                cmd.Dispose();
+            }
+        }
+        public void WriteToken(string AccessToken, string TokenType, int ExpiresIn, string Error, DateTime CreateDate)
+        {
+            using (var cn = new SqlConnection(@"Data Source=(LocalDB)\v11.0;AttachDbFilename" +
+            "=|DataDirectory|\\Database.mdf; Integrated Security=True"))
+            {
+                string _insertSql = @"INSERT INTO [dbo].[BackgroundTask] 
+                                    ([AccessToken],[TokenType],[ExpiresIn],[Error],[CreateDate])
+                                    VALUES (@act, @t, @ex, @er, @cd)";
+                var insertCmd = new SqlCommand(_insertSql, cn);
+                insertCmd.Parameters
+                    .Add(new SqlParameter("@act", SqlDbType.VarChar))
+                    .Value = AccessToken;
+                insertCmd.Parameters
+                    .Add(new SqlParameter("@t", SqlDbType.VarChar))
+                    .Value = TokenType;
+                insertCmd.Parameters
+                    .Add(new SqlParameter("@ex", SqlDbType.Int))
+                    .Value = ExpiresIn;
+                if (Error == null)
+                {
+                    insertCmd.Parameters
+                        .Add(new SqlParameter("@er", SqlDbType.VarChar))
+                        .Value = "null";
+                }
+                else
+                {
+                    insertCmd.Parameters
+                        .Add(new SqlParameter("@er", SqlDbType.VarChar))
+                        .Value = Error;
+                }
+                insertCmd.Parameters
+                    .Add(new SqlParameter("@cd", SqlDbType.DateTime))
+                    .Value = CreateDate;
+                cn.Open();
+                insertCmd.ExecuteNonQuery();
+            }
+        }
+
+        public Token GetToken()
+        {
+            Token t = new Token();
+            using (var cn = new SqlConnection(@"Data Source=(LocalDB)\v11.0;AttachDbFilename" +
+             "=|DataDirectory|\\Database.mdf; Integrated Security=True"))
+            {
+                string _sql = @"SELECT [AccessToken],[TokenType],[ExpiresIn],[Error],[CreateDate] FROM [dbo].[BackgroundTask]";
+                var cmd = new SqlCommand(_sql, cn);
+                cn.Open();
+                var reader = cmd.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    List<StoredSpotifyData> data = new List<StoredSpotifyData>();
+                    while (reader.Read())
+                    {
+                        t.AccessToken = reader["AccessToken"].ToString();
+                        t.TokenType = (reader["TokenType"].ToString());
+                        t.ExpiresIn = Convert.ToInt32(reader["ExpiresIn"].ToString());
+                        t.Error = reader["Error"].ToString();
+                        t.CreateDate = Convert.ToDateTime(reader["CreateDate"].ToString());
+                    }
+                    reader.Dispose();
+                    cmd.Dispose();
+                }
+                return t;
+            }
+        }
+        public void TruncateToken()
+        {
+            using (var cn = new SqlConnection(@"Data Source=(LocalDB)\v11.0;AttachDbFilename" +
+             "=|DataDirectory|\\Database.mdf; Integrated Security=True"))
+            {
+                string _sql = @"TRUNCATE TABLE BackgroundTask";
                 var cmd = new SqlCommand(_sql, cn);
                 cn.Open();
                 var reader = cmd.ExecuteReader();

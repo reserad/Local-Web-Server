@@ -27,6 +27,7 @@ namespace Local_Web_Server.Controllers
         private List<FullTrack> _savedTracks;
         private List<SimplePlaylist> _playlists;
         private bool check = true;
+        private bool Winner = false;
 
         // GET: Test
         public ActionResult Music()
@@ -40,19 +41,19 @@ namespace Local_Web_Server.Controllers
             };
             _auth.OnResponseReceivedEvent += _auth_OnResponseReceivedEvent;
 
-            _auth.StartHttpServer(8000);
-            _auth.DoAuth();
+            //_auth.StartHttpServer(8000);
+            _auth.DoAuth(true);
 
             SpotifyModel sm = new SpotifyModel();
             _spotifyLocal = new SpotifyLocalAPI();
 
             if (!SpotifyLocalAPI.IsSpotifyRunning())
             {
-                return Json(false);
+                return View(sm);
             }
             if (!SpotifyLocalAPI.IsSpotifyWebHelperRunning())
             {
-                return Json(false);
+                return View(sm);
             }
 
             bool successful = _spotifyLocal.Connect();
@@ -63,6 +64,15 @@ namespace Local_Web_Server.Controllers
                 sm.IsPlaying = true;
                 try
                 {
+                    sm.VotedItemsDictionary = GetDictionaryDetails(sm.SongTitle);
+
+                    if (Winner)
+                    {
+                        SpotifyModel spotifyModel = new SpotifyModel();
+                        Winner = false;
+                        spotifyModel.Truncate();
+                    }
+
                     sm.SongTitle = _currentTrack.TrackResource.Name;
                     sm.SongArtist = _currentTrack.ArtistResource.Name;
 
@@ -96,34 +106,38 @@ namespace Local_Web_Server.Controllers
                     sm.NextSongAlbumArt = sm.Tracks[index].albumArt;
                     sm.NextSongTitle = sm.Tracks[index].title;
                     sm.NextSongArtist = sm.Tracks[index].artist;
+
                     _auth = null;
                     _spotifyLocal = null;
                     _spotify = null;
-
-                    SpotifyModel spotifyModel = new SpotifyModel();
-                    List<StoredSpotifyData> votes = spotifyModel.GetVotes();
-                    if (votes.Count > 0 && (DateTime.Now.Millisecond - votes[0].Time.Millisecond > 600000 || !votes[0].SongThatWasPlaying.Equals(sm.SongTitle)))
-                    {
-                        spotifyModel.Truncate();
-                    }
-                    HashSet<string> _items = new HashSet<string>();
-                    foreach (var vote in votes)
-                    {
-                        _items.Add(vote.SongRecommendation);
-                    }
-                    Dictionary<string, int> uniqueCountOfVotes = new Dictionary<string, int>();
-                    foreach (var _item in _items)
-                    {
-                        var count = votes.Count(item => item.SongRecommendation == _item);
-                        uniqueCountOfVotes.Add(_item, count);
-                    }
-                    sm.VotedItemsDictionary = uniqueCountOfVotes;
                 }
                 catch (Exception e)
                 {
                 }
             }
             return View(sm);
+        }
+        public Dictionary<string, int> GetDictionaryDetails(string SongTitle)
+        {
+            SpotifyModel spotifyModel = new SpotifyModel();
+            List<StoredSpotifyData> votes = spotifyModel.GetVotes();
+
+            HashSet<string> _items = new HashSet<string>();
+            foreach (var vote in votes)
+            {
+                _items.Add(vote.SongRecommendation);
+            }
+            Dictionary<string, int> uniqueCountOfVotes = new Dictionary<string, int>();
+            foreach (var _item in _items)
+            {
+                var count = votes.Count(item => item.SongRecommendation == _item);
+                uniqueCountOfVotes.Add(_item, count);
+            }
+            if (votes.Count > 0 && (DateTime.Now.Millisecond - votes[0].Time.Millisecond > 600000 || !votes[0].SongThatWasPlaying.Equals(SongTitle)))
+            {
+                Winner = true;
+            }
+            return uniqueCountOfVotes;
         }
 
         void _auth_OnResponseReceivedEvent(Token token, string state)
@@ -180,12 +194,11 @@ namespace Local_Web_Server.Controllers
         {
             _spotifyLocal = new SpotifyLocalAPI();
             bool successful = _spotifyLocal.Connect();
-            if (successful)
+            string ip = Request.UserHostAddress;
+            SpotifyModel spotifyModel = new SpotifyModel();
+            if (successful && spotifyModel.IsValidVote(ip))
             {
-                SpotifyModel spotifyModel = new SpotifyModel();
-                spotifyModel.CreateVoteEntry(SongRecommendation, DateTime.Now, SongThatWasPlaying);
-                //_spotifyLocal.ListenForEvents = true;
-                //_spotifyLocal.Skip();
+                spotifyModel.CreateVoteEntry(SongRecommendation, DateTime.Now, SongThatWasPlaying, ip);
             }
             return Json(true, JsonRequestBehavior.AllowGet);
         }
@@ -369,7 +382,6 @@ namespace Local_Web_Server.Controllers
             }
             return Json(true);
         }
-
 
         [HttpPost]
         public JsonResult CreateFolder(string location)
