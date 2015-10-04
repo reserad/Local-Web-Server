@@ -38,6 +38,7 @@ namespace Local_Web_Server.Models
         public string NextSongTitle { get; set; }
         public string NextSongArtist { get; set; }
         public string NextSongAlbumArt { get; set; }
+        public bool IsValidIP { get; set; }
         public Dictionary<string, int> VotedItemsDictionary { get; set; } 
 
         public bool Empty
@@ -135,84 +136,6 @@ namespace Local_Web_Server.Models
              "=|DataDirectory|\\Database.mdf; Integrated Security=True"))
             {
                 string _sql = @"TRUNCATE TABLE Spotify";
-                var cmd = new SqlCommand(_sql, cn);
-                cn.Open();
-                var reader = cmd.ExecuteReader();
-                reader.Dispose();
-                cmd.Dispose();
-            }
-        }
-        public void WriteToken(string AccessToken, string TokenType, int ExpiresIn, string Error, DateTime CreateDate)
-        {
-            using (var cn = new SqlConnection(@"Data Source=(LocalDB)\v11.0;AttachDbFilename" +
-            "=|DataDirectory|\\Database.mdf; Integrated Security=True"))
-            {
-                string _insertSql = @"INSERT INTO [dbo].[BackgroundTask] 
-                                    ([AccessToken],[TokenType],[ExpiresIn],[Error],[CreateDate])
-                                    VALUES (@act, @t, @ex, @er, @cd)";
-                var insertCmd = new SqlCommand(_insertSql, cn);
-                insertCmd.Parameters
-                    .Add(new SqlParameter("@act", SqlDbType.VarChar))
-                    .Value = AccessToken;
-                insertCmd.Parameters
-                    .Add(new SqlParameter("@t", SqlDbType.VarChar))
-                    .Value = TokenType;
-                insertCmd.Parameters
-                    .Add(new SqlParameter("@ex", SqlDbType.Int))
-                    .Value = ExpiresIn;
-                if (Error == null)
-                {
-                    insertCmd.Parameters
-                        .Add(new SqlParameter("@er", SqlDbType.VarChar))
-                        .Value = "null";
-                }
-                else
-                {
-                    insertCmd.Parameters
-                        .Add(new SqlParameter("@er", SqlDbType.VarChar))
-                        .Value = Error;
-                }
-                insertCmd.Parameters
-                    .Add(new SqlParameter("@cd", SqlDbType.DateTime))
-                    .Value = CreateDate;
-                cn.Open();
-                insertCmd.ExecuteNonQuery();
-            }
-        }
-
-        public Token GetToken()
-        {
-            Token t = new Token();
-            using (var cn = new SqlConnection(@"Data Source=(LocalDB)\v11.0;AttachDbFilename" +
-             "=|DataDirectory|\\Database.mdf; Integrated Security=True"))
-            {
-                string _sql = @"SELECT [AccessToken],[TokenType],[ExpiresIn],[Error],[CreateDate] FROM [dbo].[BackgroundTask]";
-                var cmd = new SqlCommand(_sql, cn);
-                cn.Open();
-                var reader = cmd.ExecuteReader();
-                if (reader.HasRows)
-                {
-                    List<StoredSpotifyData> data = new List<StoredSpotifyData>();
-                    while (reader.Read())
-                    {
-                        t.AccessToken = reader["AccessToken"].ToString();
-                        t.TokenType = (reader["TokenType"].ToString());
-                        t.ExpiresIn = Convert.ToInt32(reader["ExpiresIn"].ToString());
-                        t.Error = reader["Error"].ToString();
-                        t.CreateDate = Convert.ToDateTime(reader["CreateDate"].ToString());
-                    }
-                    reader.Dispose();
-                    cmd.Dispose();
-                }
-                return t;
-            }
-        }
-        public void TruncateToken()
-        {
-            using (var cn = new SqlConnection(@"Data Source=(LocalDB)\v11.0;AttachDbFilename" +
-             "=|DataDirectory|\\Database.mdf; Integrated Security=True"))
-            {
-                string _sql = @"TRUNCATE TABLE BackgroundTask";
                 var cmd = new SqlCommand(_sql, cn);
                 cn.Open();
                 var reader = cmd.ExecuteReader();

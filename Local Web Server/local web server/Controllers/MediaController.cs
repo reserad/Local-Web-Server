@@ -32,6 +32,11 @@ namespace Local_Web_Server.Controllers
         // GET: Test
         public ActionResult Music()
         {
+            return View(GetSpotifyModel());
+        }
+
+        public SpotifyModel GetSpotifyModel() 
+        {
             _auth = new ImplicitGrantAuth
             {
                 RedirectUri = "http://localhost:8000",
@@ -41,19 +46,19 @@ namespace Local_Web_Server.Controllers
             };
             _auth.OnResponseReceivedEvent += _auth_OnResponseReceivedEvent;
 
-            //_auth.StartHttpServer(8000);
-            _auth.DoAuth(true);
+            _auth.StartHttpServer(8000);
+            _auth.DoAuth();
 
             SpotifyModel sm = new SpotifyModel();
             _spotifyLocal = new SpotifyLocalAPI();
 
             if (!SpotifyLocalAPI.IsSpotifyRunning())
             {
-                return View(sm);
+                return sm;
             }
             if (!SpotifyLocalAPI.IsSpotifyWebHelperRunning())
             {
-                return View(sm);
+                return sm;
             }
 
             bool successful = _spotifyLocal.Connect();
@@ -64,16 +69,8 @@ namespace Local_Web_Server.Controllers
                 sm.IsPlaying = true;
                 try
                 {
-                    sm.VotedItemsDictionary = GetDictionaryDetails(sm.SongTitle);
-
-                    if (Winner)
-                    {
-                        SpotifyModel spotifyModel = new SpotifyModel();
-                        Winner = false;
-                        spotifyModel.Truncate();
-                    }
-
                     sm.SongTitle = _currentTrack.TrackResource.Name;
+                    sm.VotedItemsDictionary = GetDictionaryDetails(sm.SongTitle);
                     sm.SongArtist = _currentTrack.ArtistResource.Name;
 
                     Bitmap derp = new Bitmap(_currentTrack.GetAlbumArt(AlbumArtSize.Size320));
@@ -115,7 +112,22 @@ namespace Local_Web_Server.Controllers
                 {
                 }
             }
-            return View(sm);
+
+            if (Winner)
+            {
+                sm.Truncate();
+                Winner = false;
+            }
+
+            string ip = Request.UserHostAddress;
+            sm.IsValidIP = sm.IsValidVote(ip);
+            return sm;
+        }
+
+        [HttpGet]
+        public JsonResult MusicPartial() 
+        {
+            return Json(GetSpotifyModel(), JsonRequestBehavior.AllowGet);
         }
         public Dictionary<string, int> GetDictionaryDetails(string SongTitle)
         {

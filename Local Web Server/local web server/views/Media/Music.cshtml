@@ -7,6 +7,12 @@
 }
 
 <script>
+
+    $(document).ready(function ()
+    {
+        setInterval(updateData, 20000);
+    });
+
     function Skip() {
         @{
             Track _currentTrack = new Track();
@@ -16,7 +22,7 @@
             {
                 StatusResponse status = _spotifyLocal.GetStatus();
 
-                if (status != null && status.Track != null && status.Track.Length != 0 && !status.Track.TrackResource.Name.Equals("ad") )
+                if (status.Track != null && status.Track.Length != 0)
                 {
                     _currentTrack = status.Track;
                     if (!_currentTrack.TrackResource.Name.Equals(Model.SongTitle))
@@ -35,8 +41,48 @@
             dataType: "json",
             success: function() {
                 swal("Success!", "Thank you for your suggestion!", "success");
+                location.reload();
             },
             error: function() { sweetAlert("Error Son", "Something went wrong!", "error"); }
+        });
+    }
+
+    function updateData()
+    {
+        $.ajax({
+            type: "GET",
+            cache: false,
+            url: '@Url.Action("MusicPartial", "Media")',
+            data: null,
+            datatype: "html",
+            success: function (data)
+            {
+                if (data.SongTitle != null)
+                {
+                    $('.customTable').html(
+                        "        <table class='table customTable' style='width: 100%; table-layout: fixed;'>" +
+                        "<tr style='height: 50%; width: 100%'><td style='width: 30%'><img class='autoResizeImage'" +
+                        " src='" + data.PreviousSongAlbumArt + "'></td><td style='width: 40%'><img class='autoResizeImage' " +
+                        "src='" + data.SongAlbumArt + "'></td><td style='width: 30%'><img class='autoResizeImage' src='" + data.NextSongAlbumArt + "'></td></tr>" +
+                        "<tr style='height: 50%'><td style='width: 30%; text-align:center'>" + data.PreviousSongTitle + " <br/> <i>" + data.PreviousSongArtist + "</i></td> " +
+                        "<td style='width: 40%; color: lightseagreen; text-align:center'>" + data.SongTitle + " <br/><i> " + data.SongArtist + "</i></td>" +
+                        "<td style='width: 30%; font-size: small; text-align:center'>" + data.NextSongTitle + " <br/> <i>" + data.NextSongArtist + "</i></td></tr></table>"
+                    );
+
+                    if (!data.IsValidIP)
+                    {
+                        $('.vote').attr('disabled', 'disabled');
+                    }
+                    else
+                        $('.vote').attr('enabled', 'enabled');
+                }
+                else
+                {
+                    $('.customTable').html("<div class='alert alert-danger' role='alert'>Ooops! Something went wrong or an ad is playing.</div>");
+                }                
+            },
+            error: function () { $('.customTable').html("<div class='alert alert-danger' role='alert'>Ooops! Something went wrong or an ad is playing.</div>"); }
+
         });
     }
 </script>
@@ -44,7 +90,7 @@
     .UserInfo {
         display: none;
     }
-     .customTable
+     .customTable, .voteTable
      {
          background-color: white;
          -webkit-border-bottom-left-radius: 10px;
@@ -71,13 +117,12 @@
         <div class="alert alert-info" role="alert">Here's what's playing. Don't like it? Vote below!</div>
         <table class="table customTable" style="width: 100%; table-layout: fixed;">
             <tr style="height: 50%; width: 100%"><td style="width: 30%"><img class="autoResizeImage" src="@Model.PreviousSongAlbumArt"></td><td style="width: 40%"><img class="autoResizeImage" src="@Model.SongAlbumArt"></td><td style="width: 30%"><img class="autoResizeImage" src="@Model.NextSongAlbumArt"></td></tr>
-            <tr style="height: 50%"><td style="width: 30%;">@Model.PreviousSongTitle <br/> <i>@Model.PreviousSongArtist</i></td><td style="width: 40%; color: lightseagreen">@Model.SongTitle <br/><i> @Model.SongArtist</i></td><td style="width: 30%; font-size: small">@Model.NextSongTitle <br/> <i>@Model.NextSongArtist</i></td></tr>
+            <tr style="height: 50%"><td style="width: 30%; text-align:center">@Model.PreviousSongTitle <br/> <i>@Model.PreviousSongArtist</i></td><td style="width: 40%; color: lightseagreen; text-align:center">@Model.SongTitle <br/><i> @Model.SongArtist</i></td><td style="width: 30%; font-size: small; text-align:center">@Model.NextSongTitle <br/> <i>@Model.NextSongArtist</i></td></tr>
         </table>
 
 
         <div class="alert alert-warning" role="alert">Here's what we got to choose from:</div>
-        <div class="table customTable">
-
+        <div class="table voteTable">
             @{
                 List<SelectListItem> sl = new List<SelectListItem>();
                 foreach (var song in Model.Tracks)
@@ -92,8 +137,19 @@
                  }
             }
             <div></div>
-            <table style="width: 100%"><tr><td>@Html.DropDownListFor(m => m.ChosenSong, sl, new {@class = "form-control PlayListItem"})</td><td><button class="btn btn-info" onclick="Skip()">Vote <span class="glyphicon glyphicon-thumbs-down"></span></button></td></tr></table>
+            @if (Model.IsValidIP)
+            {
+                <table style="width: 100%"><tr><td>@Html.DropDownListFor(m => m.ChosenSong, sl, new { @class = "form-control PlayListItem" })</td><td><button class="btn btn-info vote" onclick="Skip()">Vote <span class="glyphicon glyphicon-thumbs-down"></span></button></td></tr></table>
             }
+            else
+            {
+                <table style="width: 100%"><tr><td>@Html.DropDownListFor(m => m.ChosenSong, sl, new { @class = "form-control PlayListItem" })</td><td><button disabled class="btn btn-info vote" onclick="Skip()">Vote <span class="glyphicon glyphicon-thumbs-down"></span></button></td></tr></table>
+            }
+            
         </div>
+    }
+    else
+    {
+        <div class="alert alert-danger" role="alert">Ooops! Something went wrong or an ad is playing.</div>
     }
 }

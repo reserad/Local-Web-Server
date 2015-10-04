@@ -25,19 +25,10 @@ namespace Local_Web_Server.Controllers
         /// <summary>
         ///     Start the auth process (Make sure the internal HTTP-Server ist started)
         /// </summary>
-        public void DoAuth(bool Client)
+        public void DoAuth()
         {
             String uri = GetUri();
-            if(!Client)
-                Process.Start(uri);
-            else
-            {
-                _httpServer = new SimpleHttpServer(80, AuthType.Implicit);
-                _httpServer.OnAuth += HttpServerOnOnAuthClient;
-
-                _httpThread = new Thread(_httpServer.Listen);
-                _httpThread.Start();
-            }
+            Process.Start(uri);
         }
 
         private String GetUri()
@@ -75,16 +66,6 @@ namespace Local_Web_Server.Controllers
             };
             if (OnResponseReceivedEvent != null)
                 OnResponseReceivedEvent(t, e.State);
-            SpotifyModel sm = new SpotifyModel();
-            sm.Truncate();
-            sm.WriteToken(e.Code, e.TokenType, e.ExpiresIn, e.Error, t.CreateDate);
-        }
-
-        private void HttpServerOnOnAuthClient(AuthEventArgs e)
-        {
-            SpotifyModel sm = new SpotifyModel();
-            if (OnResponseReceivedEvent != null)
-                OnResponseReceivedEvent(sm.GetToken(), "XSS");
         }
 
         /// <summary>

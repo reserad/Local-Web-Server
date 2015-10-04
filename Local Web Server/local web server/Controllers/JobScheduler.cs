@@ -19,7 +19,7 @@ namespace Local_Web_Server.Controllers
             ITrigger trigger = TriggerBuilder.Create()
                 .WithDailyTimeIntervalSchedule
                   (s =>
-                     s. WithIntervalInSeconds(10)
+                     s. WithIntervalInSeconds(20)
                     .OnEveryDay()
                     .StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(0, 0))
                   )

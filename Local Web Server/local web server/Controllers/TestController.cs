@@ -7,6 +7,7 @@ using SpotifyAPI.Local;
 using SpotifyAPI.Local.Models;
 using SpotifyAPI.Web.Enums;
 using SpotifyAPI.Web.Models;
+using System.Threading;
 
 namespace Local_Web_Server.Controllers
 {
@@ -33,7 +34,7 @@ namespace Local_Web_Server.Controllers
             _auth.OnResponseReceivedEvent += _auth_OnResponseReceivedEvent;
 
             _auth.StartHttpServer(8000);
-            _auth.DoAuth(false);
+            _auth.DoAuth();
 
             _spotifyLocal = new SpotifyLocalAPI();
 
@@ -56,12 +57,20 @@ namespace Local_Web_Server.Controllers
                 {
                     dictDetails.Sort();
                     var winner = dictDetails[0];
-                    spotifyModel.Truncate();
-                    while (!_currentTrack.TrackResource.Name.Equals(winner))
+                    var temp = "";
+                    if (_currentTrack.TrackType != "ad")
+                    {
+                        temp = _currentTrack.TrackResource.Name + " - " + _currentTrack.ArtistResource.Name;
+                    }
+                    while (!temp.Equals(winner))
                     {
                         _spotifyLocal.Skip();
+                        UpdateInfos();
+                        temp = _currentTrack.TrackResource.Name + " - " + _currentTrack.ArtistResource.Name;
+                        Thread.Sleep(100);
                     }
                     Winner = false;
+                    spotifyModel.Truncate();
                 }
             }
         }

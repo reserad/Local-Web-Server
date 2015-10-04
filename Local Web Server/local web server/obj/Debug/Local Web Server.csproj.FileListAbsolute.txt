@@ -192,3 +192,26 @@ C:\Users\areser\Documents\GitHub\Local-Web-Server\Local Web Server\Local Web Ser
 C:\Users\areser\Documents\GitHub\Local-Web-Server\Local Web Server\Local Web Server\bin\Common.Logging.Core.xml
 C:\Users\areser\Documents\GitHub\Local-Web-Server\Local Web Server\Local Web Server\bin\Quartz.pdb
 C:\Users\areser\Documents\GitHub\Local-Web-Server\Local Web Server\Local Web Server\bin\Quartz.xml
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\Common.Logging.Core.dll
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\Common.Logging.dll
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\Microsoft.Threading.Tasks.dll
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\Microsoft.Threading.Tasks.Extensions.Desktop.dll
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\Microsoft.Threading.Tasks.Extensions.dll
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\Quartz.dll
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\SpotifyAPI.dll
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\SpotifyWebAPI.dll
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\System.Net.Http.Extensions.dll
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\System.Net.Http.Primitives.dll
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\Common.Logging.pdb
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\Common.Logging.xml
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\Common.Logging.Core.pdb
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\Common.Logging.Core.xml
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\Microsoft.Threading.Tasks.xml
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\Microsoft.Threading.Tasks.Extensions.xml
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\Microsoft.Threading.Tasks.Extensions.Desktop.xml
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\Quartz.pdb
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\Quartz.xml
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\SpotifyAPI.xml
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\System.Net.Http.Extensions.xml
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\bin\System.Net.Http.Primitives.xml
+C:\Users\Alec\Desktop\Local Web Server\Local Web Server\Local Web Server\obj\Debug\Local Web Server.csproj.App.config
